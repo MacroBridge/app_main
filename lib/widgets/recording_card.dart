@@ -4,11 +4,6 @@ enum RecordingStatus { idle, recording, processing }
 
 // Recording Card widget - parent state management
 class RecordingCard extends StatelessWidget {
-  // Widget Parameters
-  final RecordingStatus status;
-  final VoidCallback onStart;
-  final VoidCallback onStop;
-
   // Widget Constructor
   const RecordingCard({
     super.key,
@@ -17,10 +12,16 @@ class RecordingCard extends StatelessWidget {
     required this.onStop,
   });
 
+  // Widget Parameters
+  final RecordingStatus status;
+  final VoidCallback onStart;
+  final VoidCallback onStop;
+
   @override
   Widget build(BuildContext context) {
     // Material You color palette
-    final colors = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textScheme = Theme.of(context).textTheme;
 
     // Recording state variables
     final isRecording = status == RecordingStatus.recording;
@@ -28,24 +29,64 @@ class RecordingCard extends StatelessWidget {
 
     // Colors based on recording state (error* if recording, primary* otherwise)
     final circleBg = isRecording
-        ? colors.errorContainer
-        : colors.primaryContainer;
+        ? colorScheme.errorContainer
+        : colorScheme.primaryContainer;
     final circleFg = isRecording
-        ? colors.onErrorContainer
-        : colors.onPrimaryContainer;
-    final borderColor = isRecording ? colors.error : colors.outlineVariant;
+        ? colorScheme.onErrorContainer
+        : colorScheme.onPrimaryContainer;
+    final borderColor = isRecording
+        ? colorScheme.error
+        : colorScheme.outlineVariant;
 
-    // Microphone Button Element
-    final MicrophoneButtonElem = Center(
-      child:
-          isProcessing // Spinner if processing, mic icon otherwise
-          ? CircularProgressIndicator(color: circleFg, strokeWidth: 3)
-          : Icon(
-              // Mic icon is filled when recording
-              isRecording ? Icons.mic : Icons.mic_none_outlined,
-              size: 56,
-              color: circleFg,
-            ),
+    // Event Handlers
+    void handleRecordingStatus() {
+      // Do nothing if recording is being processed
+      if (isProcessing) return;
+
+      if (isRecording) {
+        // Call stop recording callback if recording
+        onStop();
+      } else {
+        // Call start recording callback if not recording
+        onStart();
+      }
+    }
+
+    // Animation Constants
+    const animationDuration = Duration(milliseconds: 250);
+    const animationCurve = Curves.easeInOut;
+
+    // UI Elements
+    final microphoneButtonElement = GestureDetector(
+      onTap: handleRecordingStatus,
+      child: Center(
+        child:
+            isProcessing // Spinner if processing, mic icon otherwise (filled when recording)
+            ? CircularProgressIndicator(color: circleFg, strokeWidth: 3)
+            : Icon(
+                isRecording ? Icons.mic : Icons.mic_none_outlined,
+                size: 56,
+                color: circleFg,
+              ),
+      ),
+    );
+
+    final recordingStatusElement = SizedBox(
+      width: double.infinity,
+      height: 30,
+      child: Center(
+        child: Text(
+          switch (status) {
+            RecordingStatus.idle => "Ready to Record",
+            RecordingStatus.recording => "Recording...",
+            RecordingStatus.processing => "Processing...",
+          },
+          style: textScheme.titleSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
 
     // Build recording card
@@ -54,9 +95,9 @@ class RecordingCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: borderColor, width: 1.5),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(10),
       ),
-      color: colors.surfaceContainerLow,
+      color: colorScheme.surfaceContainerLow,
 
       // Card Elements
       child: Padding(
@@ -64,59 +105,26 @@ class RecordingCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Microphone Circle Element
-            AnimatedScale(
-              scale: isRecording ? 1.08 : 1.0, // Increase size when recording
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              child: AnimatedContainer(
-                // Color/border transition speed
-                duration: const Duration(milliseconds: 250),
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: circleBg,
-                  border:
-                      isRecording // Show border only when recording
-                      ? Border.all(color: colors.error, width: 2)
-                      : null,
-                ),
-                child: MicrophoneButtonElem,
+            // Microphone Icon
+            AnimatedContainer(
+              duration: animationDuration,
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: circleBg,
+                border: isRecording
+                    ? Border.all(color: colorScheme.error, width: 2)
+                    : null,
               ),
+              child: microphoneButtonElement,
             ),
 
-            // Separator Element
+            // Separator
             const SizedBox(height: 24),
 
-            // Recording Button Element
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              // Swap button based on state, not its label
-              child: isRecording
-                  ? FilledButton.icon(
-                      onPressed: onStop,
-                      icon: const Icon(Icons.stop_circle_outlined),
-                      label: const Text('Stop Recording'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colors.error,
-                        foregroundColor: colors.onError,
-                      ),
-                    )
-                  : FilledButton.tonalIcon(
-                      onPressed: isProcessing ? null : onStart,
-                      // Disabled during processing
-                      icon: const Icon(Icons.mic_outlined),
-                      label: Text(
-                        isProcessing ? 'Processing...' : 'Start Recording',
-                      ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colors.secondaryContainer,
-                        foregroundColor: colors.onSecondaryContainer,
-                      ),
-                    ),
-            ),
+            // Recording Status
+            recordingStatusElement,
           ],
         ),
       ),

@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/header_card.dart';
 import '../widgets/recording_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -49,9 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     // Build homescreen layout
     return Scaffold(
+      appBar: HeaderCard(title: "MacroBridge"),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0)
+              .copyWith(bottom: 16.0),
           child: Column(
             children: [
               // Recording Card Element
