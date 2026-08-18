@@ -1,18 +1,11 @@
-import 'package:app_main/screens/home_screen.dart';
+import 'package:MacroBridge/screens/home_screen.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
 
 import "theme.dart";
 
 void main() {
   runApp(const App());
-}
-
-// Top Level Preview
-@Preview()
-Widget appPreview() {
-  return const App();
 }
 
 class App extends StatelessWidget {

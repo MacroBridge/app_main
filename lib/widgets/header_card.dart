@@ -8,8 +8,9 @@ class HeaderCard extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
   // Help Message
-  static const String _helpMessage =
-      'This is the help message for this screen.';
+  static const String _helpMessage = """
+  
+  """;
 
   @override
   Widget build(BuildContext context) {
