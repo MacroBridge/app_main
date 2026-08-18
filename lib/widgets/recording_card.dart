@@ -63,8 +63,11 @@ class _RecordingCardState extends State<RecordingCard> {
 
     await Future.delayed(const Duration(seconds: 3)); // placeholder
 
-    // Reset status and invoke callback with transcribed text
+    // Reset status and time elapsed
     setState(() => _status = RecordingStatus.idle);
+    setState(() => _timeElapsed = Duration.zero);
+
+    // Invoke callback with transcribed text
     widget.onTranscript("PLACEHOLDER VALUE");
   }
 
@@ -78,7 +81,7 @@ class _RecordingCardState extends State<RecordingCard> {
   Widget build(BuildContext context) {
     // Material You color palette
     final colorScheme = Theme.of(context).colorScheme;
-    final textScheme = Theme.of(context).textTheme;
+    final textTheme = Theme.of(context).textTheme;
 
     // Recording state variables
     final isRecording = _status == RecordingStatus.recording;
@@ -124,7 +127,7 @@ class _RecordingCardState extends State<RecordingCard> {
 
     final timeElapsedElement = Text(
       "${_formatDuration(_timeElapsed)} / ${_formatDuration(_maxDuration)}",
-      style: textScheme.titleSmall?.copyWith(
+      style: textTheme.titleSmall?.copyWith(
         color: colorScheme.onSurfaceVariant,
         fontWeight: FontWeight.w500,
       ),
@@ -132,11 +135,11 @@ class _RecordingCardState extends State<RecordingCard> {
 
     final recordingStatusElement = Text(
       switch (_status) {
-        RecordingStatus.idle => "Ready to Record",
+        RecordingStatus.idle => "Dictate Meal",
         RecordingStatus.recording => "Recording...",
         RecordingStatus.processing => "Processing...",
       },
-      style: textScheme.titleSmall?.copyWith(
+      style: textTheme.titleSmall?.copyWith(
         color: colorScheme.onSurfaceVariant,
         fontWeight: FontWeight.w500,
       ),
@@ -146,25 +149,18 @@ class _RecordingCardState extends State<RecordingCard> {
     return Card(
       // Card Styling
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: borderColor, width: 1.5),
-        borderRadius: BorderRadius.circular(10),
-      ),
       color: colorScheme.surfaceContainerLow,
 
       // Card Elements
-      child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            recordingStatusElement,
-            const Spacer(),
-            timeElapsedElement,
-            const SizedBox(width: 16),
-            microphoneButtonElement,
-          ],
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          recordingStatusElement,
+          const Spacer(),
+          timeElapsedElement,
+          const SizedBox(width: 16),
+          microphoneButtonElement,
+        ],
       ),
     );
   }
